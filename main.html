@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>recpie finder</title>
+</head>
+<body>
+    <div id="App"></div>
+
+    <script type="text/babel">
+            class RenderAllRecpie extends React.Component{
+                render(){
+                    console.log('view-all',this.props.allRecpie)
+                    const renderHTML = this.props.allRecpie.map((recpie,key) => {
+                        return (
+                            <div className="card bg-dark mb-4 text-white mx-4" 
+                            key={key}>
+                                <img src={recpie.recipe.image} 
+                                className="card-img-top"/>
+                                <div className="container">
+                                    <h4 className="text-center my-4">{recpie.recipe.label}</h4>
+                                
+                                    <hr className="width-80 bg-white"/>
+                                <div className="container">
+                                    <div className="mb-1">
+                                        <h5>
+                                            <small>source :</small>
+                                            <b className="ml-2">{recpie.recipe.source}</b>
+                                        </h5>
+                                    </div>
+                                    <div className="mb-1">
+                                        <p>
+                                            <small>calories :</small>
+                                            <b className="ml-1">{Math.floor(recpie.recipe.calories)} kcal</b>
+                                        </p>
+                                    </div>
+                                    <div className="mb-1">
+                                        <p>
+                                            <small>Diet :</small>
+                                            {recpie.recipe.dietLabels.map((lab,key) => {
+                                                if(recpie.recipe.dietLabels.length >= 1){
+                                                    return(
+                                                        <b key={key} className="ml-1">
+                                                            {lab}
+                                                        </b>
+                                                    )
+                                                }
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className="mb-1">
+                                        <p>
+                                            <small>Health :</small>
+                                            {recpie.recipe.healthLabels.map((lab,key) => {
+                                                if(recpie.recipe.healthLabels.length >= 1){
+                                                    return(
+                                                        <b key={key} className="ml-1">
+                                                            {lab},
+                                                        </b>
+                                                    )
+                                                }
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className="mb-1">
+                                        <p><small>cautions :</small><b> - </b></p>
+                                    </div>
+                                    <div className="mb-1">
+                                        <p>
+                                            <small>ingredients :</small>
+                                            {recpie.recipe.ingredients.map((lab,key) => {
+                                                return(
+                                                    <b key={key} className="ml-1">
+                                                        {lab.text}
+                                                    </b>
+                                                )
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            <small>totalNutrients : </small>
+                                            <div>
+                                            {recpie.recipe.digest.map((lab,key) => {
+                                                return(
+                                                    <div className="ml-2" key={key}>
+                                                        <p>
+                                                            <small>{lab.label}</small> :
+                                                            <b className="ml-2">{Math.floor(lab.total)} kcal</b>
+                                                        </p>
+                                                    </div>
+                                                )
+                                            })}
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                })
+                    return(
+                        <div>
+                            <div className="container card-columns">
+                                { renderHTML }        
+                            </div>
+                        </div>
+                    )
+                }
+            }
+        
+        class Recpie extends React.Component{
+            constructor(props){
+                super(props)
+                this.state = {
+                    recpieArr : [],
+                    query : "dosa",
+                    appId : '2befce5e',
+                    appKey : '45d7cbf587d928303b14bce7cf1bf33b'
+                }
+            }
+            
+            componentDidMount = () => {
+                this.fetchDate()
+            }
+            
+            fetchDate = () => {
+                fetch(`https://api.edamam.com/search?q=${this.state.query}&app_id=${this.state.appId}&app_key=${this.state.appKey}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data)
+                        this.setState({
+                            recpieArr : [...data.hits]
+                        })
+                    })
+                    .catch(err => {
+                        if (err){
+                            console.log("something went wrong!...")
+                        }
+                    })
+            }
+
+            search = (event) => {
+                event.preventDefault()
+                this.fetchDate()
+                this.reset()
+            }
+
+            reset = () => {
+                this.setState({
+                    query : ""
+                })
+            }
+
+            handelChange = (event) => {
+                this.setState({
+                    query : event.target.value
+                })
+            }
+
+            render(){
+                console.log('state',this.state.recpieArr)
+                return(
+                    <div>
+                        <div className="container mt-3 mb-2">
+                            <h1 className="text-center">recpie finder!...</h1>                            
+                        </div>
+                        <div>
+                            <div className="container my-5 text-center">
+                                <form>
+                                    <div className="form-group col-sm-4"> 
+                                    <input type="text" className="form-control" 
+                                    placeholder="search your recpie here.."
+                                    value={this.state.query} onChange={this.handelChange}/>
+                                    <button onClick={this.search} 
+                                    className="btn btn-primary btn-sm form-control mt-3">
+                                        search
+                                    </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div>
+                            <RenderAllRecpie allRecpie={this.state.recpieArr}/>
+                        </div>
+                    </div>
+                )
+            }
+        }
+
+
+        class App extends React.Component{
+            render(){
+                return(
+                    <div className="container">
+                        <Recpie />
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(<App />,document.getElementById("App"))
+    </script>
+</body>
+</html>
